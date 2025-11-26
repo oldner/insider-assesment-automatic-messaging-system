@@ -1,0 +1,142 @@
+basePath: /
+definitions:
+  handler.CreateMessageRequest:
+    properties:
+      content:
+        type: string
+      to:
+        type: string
+    required:
+    - content
+    - to
+    type: object
+  model.Message:
+    properties:
+      content:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      sent_at:
+        type: string
+      status:
+        $ref: '#/definitions/model.MessageStatus'
+      to:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  model.MessageStatus:
+    enum:
+    - PENDING
+    - SENT
+    - FAILED
+    type: string
+    x-enum-varnames:
+    - StatusPending
+    - StatusSent
+    - StatusFailed
+host: localhost:8080
+info:
+  contact: {}
+  description: API for Automatic Message Sending System.
+  title: Insider Assessment API
+  version: "1.0"
+paths:
+  /health:
+    get:
+      description: Returns 200 OK if the server is running
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Health check endpoint
+      tags:
+      - System
+  /messages:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Message Content
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/handler.CreateMessageRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.Message'
+      summary: Add a new message (Test Helper)
+      tags:
+      - Messages
+  /messages/cache:
+    get:
+      description: Retrieves all messages currently stored in Redis cache.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get all cached messages
+      tags:
+      - Messages
+  /sent-messages:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Message'
+            type: array
+      summary: Get list of sent messages
+      tags:
+      - Messages
+  /start:
+    post:
+      description: Resumes the background ticker that sends messages every 2 minutes.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Start the automatic message sender
+      tags:
+      - Control
+  /stop:
+    post:
+      description: Pauses the background ticker.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Stop the automatic message sender
+      tags:
+      - Control
+swagger: "2.0"

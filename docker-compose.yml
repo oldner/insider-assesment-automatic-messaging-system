@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_HOST=postgres
+      - DB_USER=user
+      - DB_PASSWORD=password
+      - DB_NAME=insider_db
+      - DB_PORT=5432
+      - REDIS_ADDR=redis:6379
+      - WEBHOOK_URL=https://webhook.site/9a4e5fc3-c283-46cc-9609-eee82294e0ef
+      - WORKER_BATCH_SIZE=2
+      - WORKER_INTERVAL=2m
+      - REDIS_TTL=24h
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - insider-network
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: insider_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - insider-network
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - insider-network
+
+networks:
+  insider-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
